@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links line {
+  stroke: #A33;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #3A3;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+yo
+<br>
+before div
+<div>
+  <p></p>
+  
+  asdfasdf
+  antoher place
+</div>
+after div
+
+</body>
+<script src="d3.v4.min.js"></script>
+<script>
+p=d3.select("div").selectAll("p")
+  .data([4, 8, 15, 16, 23, 42])
+     .text(function(d) { return d; });
+
+// Enter…
+p.enter().append("p")
+    .text(function(d) { return d; });
+
+// Exit…
+p.exit().remove();
+
+</script>
