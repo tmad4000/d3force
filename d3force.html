@@ -12,10 +12,35 @@
   stroke-width: 1.5px;
 }
 
+.floating-graph-controls > * {
+  margin-right: 5px;
+  padding: 2px;
+  display: inline-block;
+}
+
+.floating-graph-controls > span {
+  background-color: lightGray;
+
+  margin-right: 5px;
+  padding: 2px;
+  display: inline-block;
+}
 </style>
 
-<svg width="960" height="600"></svg>
+<div style='border:1px solid gray; position:relative'>
+            <div style='position:absolute; top:10px; left:10px' class="floating-graph-controls">
+                <button id="play-pause">
+                      Play
+                </button>
+                
+                <span><span id="fps"></span>  FPS </span>
+                <span> nodes: <span id="num-nodes"></span>, edges: <span id="num-links"></span> </span>
 
+              </div>
+
+
+  <svg width="960" height="600"></svg>
+</div>
 <script src="d3.v4.min.js"></script>
 <script>
 
@@ -32,24 +57,26 @@ var simulation = d3.forceSimulation()
 
 
 
-
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
 
   for(var i=0;i<4;i++)
-    graph.nodes.push.apply(
-      graph.nodes,
-      graph.nodes.map((n) => { return {"id": "Myriel" + i, "group": 1} }
+    graph.nodes = graph.nodes.concat(
+      graph.nodes.map((n,j) => { return {"id": "aaa" + i+""+j, "group": 3} }
         )
       )
 
-  graph.nodes.forEach( (n) => {
-        for(var j=0;j<4;j++)
-          if(Math.random()>.8) graph.links.push({"source": n.id, "target": graph.nodes[Math.floor(Math.random()*graph.nodes.length)], "value": 1})
+  graph.nodes.forEach( (n,i) => {
+        for(var j=0;j<1;j++)
+          if(((i+j)**17) % 7 <= 1 ) graph.links.push(
+            {"source": n.id, 
+             "target": graph.nodes[((i+j)**17) % graph.nodes.length] , "value": 1}
+             )
         }
     )
 
-
+  d3.select("#num-nodes").html(graph.nodes.length)
+  d3.select("#num-links").html(graph.links.length)
   console.log(graph.nodes.length, " nodes")
 
   var link = svg.append("g")
@@ -57,6 +84,7 @@ d3.json("miserables.json", function(error, graph) {
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
+
 
   var node = svg.append("g")
       .attr("class", "nodes")
@@ -80,14 +108,25 @@ d3.json("miserables.json", function(error, graph) {
   simulation.force("link")
       .links(graph.links);
 
+  
+  lastFrameTimeDiffMS = 0;
+  lastFrameTimeMS = 0;
   function ticked() {
-    link
+    
+    const t = Date.now()
+    
+    lastFrameTimeDiffMS = t-lastFrameTimeMS
+    lastFrameTimeMS = t
+    d3.select("#fps").html( (1000/lastFrameTimeDiffMS).toFixed(1) )
+
+
+    svg.selectAll("line")
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-    node
+    svg.selectAll("circle")
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   }
@@ -110,6 +149,21 @@ function dragended(d) {
   d.fy = null;
 }
 });
+
+var graphStarted = true;
+d3.select("#play-pause").on("click", 
+  () => {
+    if(graphStarted) {
+      graphStarted = false
+      d3.select("#play-pause").html("Pause")
+      return simulation.stop()
+    }
+    else {
+      graphStarted = true
+      d3.select("#play-pause").html("Play")
+      return simulation.restart()
+    }
+  })
 
 
 </script>
