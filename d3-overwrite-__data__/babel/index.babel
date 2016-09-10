@@ -1,0 +1,21 @@
+console.clear();
+let myData = [
+  {name: "David", score: 10},
+  {name: "Jacob", score: 0},
+  {name: "Shadi", score: 5},
+];
+
+document.getElementById("test").__data__={name:"Jacob"}
+                          
+let mySelection = d3.select("#canvs").selectAll("p")
+.data(myData, (d) => { console.log(d); return d ? d.name : '';})
+
+// console.log(mySelection);
+
+mySelection.enter()
+.append("p")
+.html((d) => d.name + " " +d.score)
+
+mySelection   
+.html((d) => d.name + " " +d.score)
+
